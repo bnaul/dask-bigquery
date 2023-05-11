@@ -120,7 +120,9 @@ def bucket():
 
     bucket = f"dask-bigquery-tmp-{uuid.uuid4().hex}"
 
-    fs = gcsfs.GCSFileSystem(project=project_id, access="read_write", token=credentials.token)
+    fs = gcsfs.GCSFileSystem(
+        project=project_id, access="read_write", token=credentials.token
+    )
 
     yield bucket, fs
 
@@ -177,7 +179,9 @@ def write_dataset():
         (None, {"write_disposition": "WRITE_APPEND"}),  # non-default
         (
             None,
-            {"source_format": bigquery.SourceFormat.AVRO},  # non-default, should enforce PARQUET
+            {
+                "source_format": bigquery.SourceFormat.AVRO
+            },  # non-default, should enforce PARQUET
         ),
     ],
 )
@@ -240,7 +244,9 @@ def test_roundtrip(df, write_dataset):
     ddf = dd.from_pandas(df, npartitions=2)
     table_id = "roundtrip_table"
 
-    result = to_gbq(ddf, project_id=project_id, dataset_id=dataset_id, table_id=table_id)
+    result = to_gbq(
+        ddf, project_id=project_id, dataset_id=dataset_id, table_id=table_id
+    )
     assert result.state == "DONE"
 
     ddf_out = read_gbq(project_id=project_id, dataset_id=dataset_id, table_id=table_id)
@@ -313,7 +319,9 @@ def test_arrow_options(table):
         project_id=project_id,
         dataset_id=dataset_id,
         table_id=table_id,
-        arrow_options={"types_mapper": {pa.string(): pd.StringDtype(storage="pyarrow")}.get},
+        arrow_options={
+            "types_mapper": {pa.string(): pd.StringDtype(storage="pyarrow")}.get
+        },
     )
     assert ddf.dtypes["name"] == pd.StringDtype(storage="pyarrow")
 
